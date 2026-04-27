@@ -1,15 +1,20 @@
 
---- Pruebas con base de datos de ADVENTUREWORKS2019
+--- Pruebas CON BASE DE DATOS DE ADVENTUREWORKS2019
 
 
---- cLIENTES SIN COMPRAS
+
+
+--- #VALIDACION DE DATOS (QA)
+
+
+
+--- Clientes sin compras
 
 SELECT SC.CustomerID, ISNULL(SUM(TotalDue), 0) as Total_gastado
 FROM Sales.Customer SC
 LEFT JOIN SALES.SalesOrderHeader SOH ON(SC.CustomerID = SOH.CustomerID)
 WHERE SOH.CustomerID IS NULL
 GROUP BY SC.CustomerID
-
 
 
 --- Clientes duplicados (posible bug)
@@ -20,14 +25,18 @@ group by AccountNumber
 HAVING COUNT(*) > 1
 
 
-
-
 --- Personas sin cliente
 
 SELECT SC.CustomerID, PP.FirstName, PP.LastName
 FROM Person.Person PP
 LEFT JOIN Sales.Customer SC ON SC.PersonID = PP.BusinessEntityID
 WHERE SC.CustomerID IS NULL;
+
+
+
+
+
+--- #ANALISIS DE DATOS
 
 
 
@@ -57,6 +66,31 @@ INNER JOIN Person.Person PP
 ORDER BY SOH.CustomerID, SOH.OrderDate;
 
 
+--- Promedio gastado por cliente
+
+SELECT SC.CustomerID, ISNULL(AVG(SOH.TotalDue), 0) AS PROMEDIO_GASTADO
+FROM Sales.Customer SC
+LEFT JOIN Sales.SalesOrderHeader SOH ON (SC.CustomerID = SOH.CustomerID)
+GROUP BY SC.CustomerID
+ORDER BY PROMEDIO_GASTADO DESC
+
+
+
+--- Clientes y número de órdenes
+
+
+SELECT SC.CustomerID ,COUNT(SOH.SalesOrderID) AS NUMERO_DE_ORDENES
+FROM Sales.Customer SC
+LEFT JOIN Sales.SalesOrderHeader SOH ON (SC.CustomerID = SOH.CustomerID)
+GROUP BY SC.CustomerID
+ORDER BY NUMERO_DE_ORDENES
+
+
+
+
+
+--- #ANALISIS DE PRODUCTOS
+
 
 
 --- Productos baratos que NUNCA se han vendido
@@ -66,7 +100,6 @@ FROM Production.Product P
 LEFT JOIN Sales.SalesOrderDetail SOD ON (P.ProductID = SOD.ProductID)
 WHERE SOD.ProductID IS NULL AND P.ListPrice < 100
 ORDER BY P.ProductID
-
 
 
 
@@ -80,7 +113,6 @@ ORDER BY P.ProductID;
 
 
 
-
 --- Total Vendido por producto (Todos los productos)
 
 SELECT PP.ProductID, PP.Name, ISNULL(SOD.TOTAL_VENDIDO,0) AS TOTAL_VENDIDO
@@ -90,14 +122,9 @@ ORDER BY PP.ProductID
 
 
 
---- Clientes y número de órdenes
 
 
-SELECT SC.CustomerID ,COUNT(SOH.SalesOrderID) AS NUMERO_DE_ORDENES
-FROM Sales.Customer SC
-LEFT JOIN Sales.SalesOrderHeader SOH ON (SC.CustomerID = SOH.CustomerID)
-GROUP BY SC.CustomerID
-ORDER BY NUMERO_DE_ORDENES
+--- #TRANSACCIONES / ACTUALIZACIONES
 
 
 
@@ -119,27 +146,7 @@ LEFT JOIN Person.Person PP ON(SC.PersonID = PP.BusinessEntityID)
 WHERE PP.LastName IS NULL
 
 --- COMMIT;
---- ROLLBHACK;
-
-
---- Ajustar precios de productos vendidos
-
-
-SELECT*
-FROM Sales.SalesOrderDetail SOD
-LEFT JOIN Production.Product PPR ON(SOD.ProductID = PPR.ProductID)
-WHERE PPR.ListPrice < 50
-
-
-BEGIN TRANSACTION
-UPDATE PPR
-SET ListPrice = 50
-FROM Sales.SalesOrderDetail SOD
-LEFT JOIN Production.Product PPR ON(SOD.ProductID = PPR.ProductID)
-WHERE PPR.ListPrice < 50
-
---- COMMIT;
---- ROLLBHACK;
+--- ROLLBACK;
 
 
 --- Cambia el MIDDLE NAME de una persona específica
@@ -156,10 +163,66 @@ UPDATE Person.Person
 SET MiddleName = 'Scott'
 WHERE BusinessEntityID =18728
 
+
+SELECT BusinessEntityID,FirstName, MiddleName, LastName -- Revisar
+FROM Person.Person
+WHERE BusinessEntityID = 18728
+ORDER BY BusinessEntityID
+
 --- COMMIT;
---- ROLLBHACK;
+--- ROLLBACK;
 
 
+
+
+--- # ACTUALIZACIÓN DE PRECIOS (LÓGICA DE NEGOCIO)
+
+
+
+--- Ajustar precios de productos vendidos (Por rangos)
+
+SELECT DISTINCT SOD.ProductID, PPR.ListPrice
+FROM Sales.SalesOrderDetail SOD
+INNER JOIN Production.Product PPR ON(SOD.ProductID = PPR.ProductID)
+WHERE PPR.ListPrice < 22 -- Se usa < 22 porque en los datos actuales este es el máximo valor dentro del rango evaluado
+
+BEGIN TRANSACTION
+
+UPDATE PPR
+SET ListPrice =
+	CASE
+		WHEN ListPrice BETWEEN 0 AND 9.99 THEN ListPrice + 3
+		WHEN ListPrice BETWEEN 10 AND 19.99 THEN ListPrice + 2
+		ELSE ListPrice
+	END
+FROM Sales.SalesOrderDetail SOD
+INNER JOIN Production.Product PPR ON(SOD.ProductID = PPR.ProductID)
+
+--- COMMIT;
+--- ROLLBACK;
+
+
+
+--- Aumento de precio controlado (10% mas a los prodcutos que cuestan menos de 50)
+
+SELECT*
+FROM Production.Product P
+WHERE ListPrice < 50
+
+
+BEGIN TRANSACTION
+
+UPDATE Production.Product
+SET ListPrice = ListPrice * 1.10
+WHERE ListPrice < 50
+
+
+SELECT * --Revisar
+FROM Production.Product
+WHERE ListPrice < 55
+
+--- COMMIT;
+--- ROLLBACK;
 
 
 
