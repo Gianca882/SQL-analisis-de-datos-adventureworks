@@ -1,47 +1,54 @@
 # SQL-analisis-de-datos-adventureworks
-Consultas SQL para análisis de datos y control de calidad (QA) usando AdventureWorks2019
+
+Conjunto de consultas SQL enfocadas en análisis de datos, validación (QA) y lógica de negocio utilizando la base de datos AdventureWorks2019.
 
 ## Base de datos utilizada
 AdventureWorks2019 (Microsoft SQL Server sample database)
 
-Este repositorio contiene consultas SQL realizadas sobre la base de datos AdventureWorks2019, enfocadas en análisis de datos, validación y detección de inconsistencias.
+## Descripción
+Este repositorio contiene consultas SQL diseñadas como escenarios prácticos basados en casos reales de análisis de datos, validación de información y lógica de negocio.  
+
+El objetivo es demostrar habilidades en el uso de SQL para explorar datos, detectar inconsistencias y aplicar transformaciones controladas dentro de un entorno similar al empresarial.
 
 ## Conceptos aplicados
 - JOINs (INNER JOIN, LEFT JOIN)
-- Agregaciones (SUM, COUNT)
+- Agregaciones (SUM, COUNT, AVG)
 - Filtrado de datos con WHERE y HAVING
 - Manejo de valores nulos con ISNULL
 - Subconsultas
+- Uso de CASE para lógica condicional
 - Transacciones (BEGIN TRANSACTION, COMMIT, ROLLBACK)
-
+- Actualización de datos con lógica de negocio
 
 ## Objetivos
 - Analizar comportamiento de clientes
 - Detectar inconsistencias en datos (Data Quality / QA)
-- Generar reportes útiles para negocio
-- Practicar consultas avanzadas en SQL Server
+- Generar información útil para toma de decisiones
+- Practicar consultas intermedias en SQL Server
 
 ## Contenido
 
 ### Validación de datos (QA)
 - Clientes sin compras
+- Clientes duplicados
 - Personas sin cliente
-- Órdenes sin cliente
 
-### Análisis de negocio
+### Análisis de datos
+- Clientes con más compras
 - Cliente que más ha gastado
-- Total vendido por producto
-- Clientes con número de órdenes
+- Promedio gastado por cliente
+- Clientes y número de órdenes
+- Historial de cliente
 
 ### Análisis de productos
 - Productos sin ventas
 - Productos con stock disponible
+- Total vendido por producto
 
-### Manejo de datos
-- Uso de JOINs (INNER, LEFT)
-- Subconsultas con agregaciones
-- Uso de ISNULL para manejo de valores nulos
-- Transacciones (UPDATE + COMMIT)
+### Transacciones y actualizaciones
+- Corrección de datos (UPDATE controlado)
+- Uso de transacciones (COMMIT / ROLLBACK)
 
-## Notas
-Las consultas están diseñadas como escenarios prácticos basados en casos reales de análisis de datos y validación de información.
+### Lógica de negocio
+- Ajuste de precios por rangos (uso de CASE)
+- Aumento de precios controlado
