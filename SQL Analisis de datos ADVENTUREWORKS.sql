@@ -10,12 +10,11 @@
 
 --- Clientes sin compras
 
-SELECT SC.CustomerID, ISNULL(SUM(TotalDue), 0) as Total_gastado
+SELECT SC.CustomerID, SOH.TotalDue
 FROM Sales.Customer SC
 LEFT JOIN SALES.SalesOrderHeader SOH ON(SC.CustomerID = SOH.CustomerID)
 WHERE SOH.CustomerID IS NULL
-GROUP BY SC.CustomerID
-
+ORDER BY SC.CustomerID ASC
 
 --- Clientes duplicados (posible bug)
 
